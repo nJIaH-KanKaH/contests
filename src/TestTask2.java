@@ -1,6 +1,8 @@
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 
 public class TestTask2 {
 
@@ -10,10 +12,10 @@ public class TestTask2 {
 			String s1;
 			s1 = br.readLine();
 			int numOfDays = Integer.parseInt(s1);
-			int[] cash = new int[numOfDays];
+			BigInteger[] cash = new BigInteger[numOfDays];
 			for (int i = 0; i < numOfDays; i++) {
 				String s = br.readLine();
-				cash[i] = Integer.parseInt(s);
+				cash[i] = BigInteger.valueOf(Long.parseLong(s));
 			}
 			for (int i = 0; i < numOfDays; i++) {
 				System.out.println(amountSpent(cash[i]));
@@ -23,37 +25,23 @@ public class TestTask2 {
 		}
 	}
 
-	public static int amountSpent(int cash) {
-		if (cash < 7) {
-			
-			return -1;
-		}
-		int maxPowOfTwo = (int) Math.floor(log2(cash));
-		for (int i = maxPowOfTwo; i > 0; i--) {
-			int amountLeftAfterDay1 = cash - highestPowerof2(cash);
-			if (amountLeftAfterDay1 < 3) {
-				continue;
+	public static BigInteger amountSpent(BigInteger cash) {
+		int day = 3;
+		BigInteger initCash = cash;
+		int cashBitCount;
+		int cashBitLength;
+		while (day > 0) {
+			cashBitCount = initCash.bitCount();
+			cashBitLength = initCash.bitLength();
+			if (cashBitLength < day) {
+				return BigInteger.valueOf(-1);
 			}
-			int amountLeftAfterDay2 = amountLeftAfterDay1 - highestPowerof2(amountLeftAfterDay1);
-			if (amountLeftAfterDay2 < 1) {
-				continue;
+			initCash = initCash.flipBit(cashBitLength - 1);
+			if (cashBitCount < 2 && cashBitLength != day) {
+				initCash = initCash.flipBit(cashBitLength - 2);
 			}
-			int amountLeftAfterDay3 = amountLeftAfterDay2 - highestPowerof2(amountLeftAfterDay2);
-			return cash - amountLeftAfterDay3;
+			day--;
 		}
-		return -1;
-	}
-
-	public static int highestPowerof2(int val) {
-		if ((val & (val - 1)) == 0)
-			return val;
-		return (1 << (Integer.toBinaryString(val).length() - 1));
-	}
-
-	public static double log2(double x) {
-		if (x <= 0) {
-			throw new IllegalArgumentException("X lower than 0");
-		}
-		return Math.log(x) / Math.log(2);
+		return cash.subtract(initCash);
 	}
 }
